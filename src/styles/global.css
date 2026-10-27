@@ -1,0 +1,1173 @@
+/* ============================================================
+   Giai Điệu — hệ thống thiết kế v2
+   Editorial & ấm: Playfair Display cho tiêu đề, Be Vietnam Pro
+   cho nội dung, màu nhấn đất nung, bìa album màu theo thể loại.
+   ============================================================ */
+
+:root {
+  --font-body: 'Be Vietnam Pro', 'Segoe UI', system-ui, -apple-system, Roboto,
+    Arial, sans-serif;
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+
+  --bg: #f7f3ec;
+  --surface: #fdfbf7;
+  --surface-raised: #ffffff;
+  --ink: #231d16;
+  --ink-muted: #71665a;
+  --line: #e6ddcd;
+  --line-strong: #d0c4af;
+  --accent: #b0431c;
+  --accent-strong: #8f3512;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(176, 67, 28, 0.09);
+  --danger: #a32014;
+  --danger-soft: rgba(163, 32, 20, 0.09);
+  --shadow: 0 1px 2px rgba(35, 29, 22, 0.05), 0 10px 30px rgba(35, 29, 22, 0.08);
+  --shadow-soft: 0 6px 18px rgba(35, 29, 22, 0.07);
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --player-height: 86px;
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #151210;
+  --surface: #1d1915;
+  --surface-raised: #262019;
+  --ink: #f1eadf;
+  --ink-muted: #a3978a;
+  --line: #342d25;
+  --line-strong: #4b4134;
+  --accent: #e5814f;
+  --accent-strong: #ef9a6e;
+  --accent-ink: #27120a;
+  --accent-soft: rgba(229, 129, 79, 0.13);
+  --danger: #e0604f;
+  --danger-soft: rgba(224, 96, 79, 0.13);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 10px 30px rgba(0, 0, 0, 0.4);
+  --shadow-soft: 0 6px 18px rgba(0, 0, 0, 0.35);
+
+  color-scheme: dark;
+}
+
+/* ---------- Reset nhẹ ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------- Keyframes ---------- */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes eq-bounce {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  35% {
+    transform: scaleY(1);
+  }
+  70% {
+    transform: scaleY(0.55);
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes soft-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Khung ứng dụng ---------- */
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar__inner {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.wordmark__disc {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.wordmark__disc--spin {
+  animation: spin-slow 5s linear infinite;
+}
+
+.wordmark__accent {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.main-nav {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.main-nav__link {
+  position: relative;
+  padding: 7px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--ink-muted);
+  font-weight: 500;
+  transition: color 0.18s ease, background-color 0.18s ease;
+}
+
+.main-nav__link:hover {
+  color: var(--ink);
+  background: var(--accent-soft);
+}
+
+.main-nav__link.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.18s ease, border-color 0.18s ease, transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.theme-toggle:hover {
+  color: var(--ink);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+.theme-toggle:active {
+  transform: translateY(0);
+}
+
+.page {
+  flex: 1;
+  width: 100%;
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 32px 24px calc(var(--player-height) + 44px);
+}
+
+.page > section {
+  animation: fade-up 0.35s ease both;
+}
+
+/* ---------- Tiêu đề trang ---------- */
+
+.page-head {
+  margin-bottom: 26px;
+}
+
+.page-head__kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.page-head__title {
+  font-family: var(--font-display);
+  font-size: 2.35rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.12;
+}
+
+.page-head__subtitle {
+  margin-top: 8px;
+  color: var(--ink-muted);
+  max-width: 58ch;
+}
+
+/* ---------- Form fields ---------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.field__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-muted);
+}
+
+.field__input {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--ink);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.field__input:hover {
+  border-color: var(--ink-muted);
+}
+
+.field__input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  outline: none;
+}
+
+.field__input::placeholder {
+  color: var(--ink-muted);
+  opacity: 0.8;
+}
+
+.field__error {
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+/* ---------- Thư viện ---------- */
+
+.library__controls {
+  display: grid;
+  grid-template-columns: minmax(200px, 1.6fr) 1fr 1.1fr minmax(150px, 1.2fr);
+  gap: 14px;
+  align-items: end;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  margin-bottom: 8px;
+}
+
+.library__status {
+  min-height: 1.4em;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.library__count {
+  color: var(--ink-muted);
+  font-size: 0.88rem;
+  margin-bottom: 10px;
+}
+
+.song-list {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+.song-list__head {
+  display: grid;
+  grid-template-columns: 40px 44px minmax(0, 1fr) 92px 106px 148px;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 18px;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  color: var(--ink-muted);
+}
+
+/* ---------- Bìa album mô phỏng (màu theo thể loại) ---------- */
+
+.song-art {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(140deg, var(--art-a, #888), var(--art-b, #555));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.song-art--pop {
+  --art-a: #d85c8c;
+  --art-b: #c2451f;
+}
+
+.song-art--ballad {
+  --art-a: #4f78c4;
+  --art-b: #3c4e9e;
+}
+
+.song-art--rock {
+  --art-a: #c04a31;
+  --art-b: #8e2f2f;
+}
+
+.song-art--indie {
+  --art-a: #3f9b77;
+  --art-b: #2b6e71;
+}
+
+.song-art--rap {
+  --art-a: #7b5bbb;
+  --art-b: #a2448f;
+}
+
+/* ---------- Chip thể loại ---------- */
+
+.chip {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--chip-color, var(--ink-muted));
+  background: color-mix(in srgb, var(--chip-color, #888) 13%, transparent);
+}
+
+.chip--pop {
+  --chip-color: #bb3d72;
+}
+
+.chip--ballad {
+  --chip-color: #3e63b4;
+}
+
+.chip--rock {
+  --chip-color: #b03a22;
+}
+
+.chip--indie {
+  --chip-color: #2e7d5d;
+}
+
+.chip--rap {
+  --chip-color: #7149b1;
+}
+
+:root[data-theme='dark'] .chip--pop {
+  --chip-color: #ed87b2;
+}
+
+:root[data-theme='dark'] .chip--ballad {
+  --chip-color: #8fa9e8;
+}
+
+:root[data-theme='dark'] .chip--rock {
+  --chip-color: #ef9077;
+}
+
+:root[data-theme='dark'] .chip--indie {
+  --chip-color: #7cc9a7;
+}
+
+:root[data-theme='dark'] .chip--rap {
+  --chip-color: #b695ea;
+}
+
+/* ---------- Equalizer "đang phát" ---------- */
+
+.eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  width: 16px;
+}
+
+.eq i {
+  flex: 1;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--accent);
+  transform-origin: bottom;
+  animation: eq-bounce 0.9s ease-in-out infinite;
+}
+
+.eq i:nth-child(2) {
+  animation-delay: 0.25s;
+}
+
+.eq i:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+.eq--paused i {
+  animation-play-state: paused;
+  transform: scaleY(0.3);
+}
+
+/* ---------- Dòng bài hát ---------- */
+
+.song-row {
+  display: grid;
+  grid-template-columns: 40px 44px minmax(0, 1fr) 92px 106px 148px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  transition: background-color 0.15s ease;
+}
+
+.song-row:hover,
+.song-row:focus-within {
+  background: var(--accent-soft);
+}
+
+.song-row--current {
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.song-row__index {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+}
+
+.song-row__names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.32;
+}
+
+.song-row__title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-row--current .song-row__title {
+  color: var(--accent);
+}
+
+.song-row__artist {
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-row__genre {
+  min-width: 0;
+}
+
+.song-row__duration {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.88rem;
+  text-align: right;
+}
+
+.song-row__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+/* Trên desktop, nút thao tác hiện rõ khi đưa chuột vào dòng */
+@media (hover: hover) {
+  .song-row__actions .icon-btn,
+  .track-list__item .icon-btn {
+    opacity: 0.45;
+    transition: opacity 0.15s ease, color 0.12s ease, background-color 0.12s ease,
+      transform 0.12s ease;
+  }
+
+  .song-row:hover .icon-btn,
+  .song-row:focus-within .icon-btn,
+  .track-list__item:hover .icon-btn,
+  .track-list__item:focus-within .icon-btn {
+    opacity: 1;
+  }
+}
+
+/* ---------- Nút icon ---------- */
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: color 0.12s ease, background-color 0.12s ease, transform 0.12s ease;
+}
+
+.icon-btn:hover {
+  color: var(--ink);
+  background: var(--line);
+  transform: scale(1.08);
+}
+
+.icon-btn:active {
+  transform: scale(0.95);
+}
+
+.icon-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.icon-btn--play:hover {
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+.icon-btn--fav.is-on {
+  color: var(--accent);
+  opacity: 1 !important;
+}
+
+.icon-btn--fav.is-on svg {
+  fill: currentColor;
+}
+
+/* ---------- Trạng thái rỗng ---------- */
+
+.empty-state {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-md);
+  padding: 56px 24px;
+  text-align: center;
+  background: var(--surface);
+  animation: fade-up 0.35s ease both;
+}
+
+.empty-state__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.empty-state__title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.empty-state__hint {
+  margin-top: 8px;
+  color: var(--ink-muted);
+  max-width: 44ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.empty-state__action {
+  display: inline-flex;
+  margin-top: 18px;
+}
+
+/* ---------- Nút chữ ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.18s ease, background-color 0.18s ease,
+    color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.btn--primary:hover {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  color: var(--accent-ink);
+}
+
+.btn--danger {
+  color: var(--danger);
+}
+
+.btn--danger:hover {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+  box-shadow: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---------- Thanh phát nhạc ---------- */
+
+.player-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  background: color-mix(in srgb, var(--surface-raised) 92%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.player-bar__inner {
+  max-width: 1060px;
+  margin: 0 auto;
+  min-height: var(--player-height);
+  padding: 12px 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+}
+
+.player-bar__track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.player-bar__text {
+  min-width: 0;
+}
+
+.player-bar__title {
+  font-weight: 600;
+  font-size: 0.93rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-bar__sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+}
+
+.player-bar__idle {
+  color: var(--ink-muted);
+}
+
+.player-bar__controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-bar__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.player-bar__btn:hover {
+  background: var(--line);
+  transform: scale(1.06);
+}
+
+.player-bar__btn:active {
+  transform: scale(0.94);
+}
+
+.player-bar__btn--main {
+  width: 48px;
+  height: 48px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: var(--shadow-soft);
+}
+
+.player-bar__btn--main:hover {
+  background: var(--accent-strong);
+  color: var(--accent-ink);
+}
+
+.player-bar__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.player-bar__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+
+.player-bar__queue {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.progress__time {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.progress__track {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.progress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+  border-radius: 999px;
+  transition: width 0.3s linear;
+}
+
+/* ---------- Danh sách đơn giản (Favorites / Playlist detail) ---------- */
+
+.track-list {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.track-list__item {
+  display: grid;
+  grid-template-columns: 34px 44px minmax(0, 1fr) 88px auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 60px;
+  padding: 8px 18px;
+  border-bottom: 1px solid var(--line);
+  transition: background-color 0.15s ease;
+}
+
+.track-list__item:last-child {
+  border-bottom: none;
+}
+
+.track-list__item:hover,
+.track-list__item:focus-within {
+  background: var(--accent-soft);
+}
+
+.page-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Playlist ---------- */
+
+.playlist-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.playlist-form .field {
+  flex: 1;
+  min-width: 220px;
+  max-width: 400px;
+}
+
+.playlist-grid {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.playlist-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: fade-up 0.35s ease both;
+  transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.playlist-card:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
+.playlist-card__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(140deg, var(--accent), var(--accent-strong));
+  color: var(--accent-ink);
+  margin-bottom: 10px;
+}
+
+.playlist-card__name {
+  font-family: var(--font-display);
+  font-size: 1.18rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playlist-card__count {
+  color: var(--ink-muted);
+  font-size: 0.86rem;
+}
+
+.playlist-card__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+/* ---------- Suspense fallback ---------- */
+
+.page-loading {
+  color: var(--ink-muted);
+  padding: 48px 0;
+  text-align: center;
+  animation: soft-pulse 1.2s ease-in-out infinite;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 860px) {
+  .library__controls {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .field--search {
+    grid-column: 1 / -1;
+  }
+
+  .player-bar__inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .player-bar__meta {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .progress {
+    max-width: none;
+    flex: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+
+  .topbar__inner {
+    gap: 8px 12px;
+    padding: 8px 14px;
+    height: auto;
+    min-height: 56px;
+    flex-wrap: wrap;
+  }
+
+  .wordmark {
+    font-size: 1.25rem;
+  }
+
+  .main-nav {
+    gap: 0;
+    flex: 1 1 auto;
+  }
+
+  .main-nav__link {
+    padding: 6px 9px;
+  }
+
+  .theme-toggle {
+    margin-left: auto;
+    padding: 6px 9px;
+  }
+
+  .icon-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .song-row__actions {
+    gap: 2px;
+  }
+
+  .page {
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-bottom: calc(var(--player-height) + 76px);
+  }
+
+  .page-head__title {
+    font-size: 1.75rem;
+  }
+
+  .library__controls {
+    padding: 12px;
+  }
+
+  .song-list__head {
+    display: none;
+  }
+
+  .song-row {
+    grid-template-columns: 24px 40px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 0 10px;
+  }
+
+  .track-list__item {
+    grid-template-columns: 24px 40px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 6px 10px;
+  }
+
+  .song-art {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    font-size: 0.95rem;
+  }
+
+  .song-row__genre,
+  .song-row__duration {
+    display: none;
+  }
+
+  .theme-toggle .theme-toggle__text {
+    display: none;
+  }
+}
+
+/* Trên thiết bị không có hover, luôn hiện rõ nút thao tác */
+@media (hover: none) {
+  .icon-btn {
+    color: var(--ink);
+  }
+}
